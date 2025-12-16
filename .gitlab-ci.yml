@@ -1,0 +1,43 @@
+stages:
+  - validate
+  - package
+  - deploy_dev
+  - deploy_int
+  - deploy_prod
+
+include:
+  - local: ci/templates/gitlab-ci-base.yml
+
+validate:
+  stage: validate
+  script:
+    - python3 scripts/validate_manifest.py manifests/assets.yaml
+
+package:
+  stage: package
+  script:
+    - mkdir -p out/package
+    - bash scripts/idmc_export.sh --manifest manifests/assets.yaml --out out/package
+    - tar -czf idmc_package.tgz out/package
+  artifacts:
+    paths:
+      - idmc_package.tgz
+
+deploy_dev:
+  stage: deploy_dev
+  script:
+    - tar -xzf idmc_package.tgz
+    - bash scripts/idmc_import.sh --env dev --in out/package
+
+deploy_int:
+  stage: deploy_int
+  script:
+    - tar -xzf idmc_package.tgz
+    - bash scripts/idmc_import.sh --env int --in out/package
+
+deploy_prod:
+  stage: deploy_prod
+  when: manual
+  script:
+    - tar -xzf idmc_package.tgz
+    - bash scripts/idmc_import.sh --env prod --in out/package

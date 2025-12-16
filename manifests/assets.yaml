@@ -1,0 +1,6 @@
+packages:
+  - name: referentiel-A
+    file: packages/referentiel-A.yaml
+
+  - name: referentiel-B
+    file: packages/referentiel-B.yaml
